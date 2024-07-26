@@ -1,0 +1,75 @@
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #0c0000; /* Light background color */
+  font-family: 'Arial', sans-serif; /* Choose a font you like */
+  background-image: url("D:\textsummeriser\src\Screenshot 2024-07-26 145245.png"); /* Replace with your image path */
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat; 
+}
+
+.login-container {
+  background-color: rgba(8, 0, 0, 0.8); 
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  width: 350px;
+  color: #faf9f9; 
+  text-align: center;
+  margin: 0 auto;
+  position: relative; 
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+h2 {
+  margin-bottom: 20px;
+  font-family: 'Roboto', sans-serif; 
+  font-size: 24px;
+  color: #f7f7f7; 
+}
+
+.error {
+  color: red;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+  color: #f8f2f2; 
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #140000;
+  border-radius: 5px;
+  box-sizing: border-box; 
+  font-family: 'Roboto', sans-serif; 
+}
+
+.form-group button {
+  background-color: #4CAF50; 
+  color: rgb(251, 248, 248);
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+  font-family: 'Roboto', sans-serif; 
+}
+
+.form-group button:hover {
+  background-color: #45a049; 
+}
