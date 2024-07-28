@@ -1,11 +1,12 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
-const cors = require('cors'); 
-const bodyParser = require('body-parser'); // For parsing request bodies
-require('dotenv').config(); // Load environment variables from a .env file
+const cors = require('cors');
+const bodyParser = require('body-parser');
+const bcrypt = require('bcrypt');
+require('dotenv').config();
 
-// MongoDB connection (replace with your MongoDB connection string)
+// Database Connection
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
@@ -20,7 +21,7 @@ app.use(express.json());
 app.use(cors()); 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// User model (replace with your actual user schema)
+// User Model
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
@@ -37,7 +38,10 @@ app.post('/api/register', async (req, res) => {
       return res.status(400).json({ error: 'Email already exists' });
     }
 
-    const newUser = new User({ email, password });
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10); 
+
+    const newUser = new User({ email, password: hashedPassword }); 
     await newUser.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
@@ -56,10 +60,10 @@ app.post('/api/login', async (req, res) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    // ... (Replace this with your actual password verification) ...
-    if (user.password === password) {
-      // ... (You would normally generate a JWT token and send it back to the client) ...
-      res.status(200).json({ message: 'Login successful' });
+    // Compare provided password with the stored hash
+    const isMatch = await bcrypt.compare(password, user.password); 
+    if (isMatch) {
+      res.status(200).json({ message: 'Login successful' }); // No token generated
     } else {
       res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -69,7 +73,19 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-// Start the server
-app.listen(process.env.PORT || 3001, () => {
-  console.log('Server listening on port', process.env.PORT || 3001);
+// Protected Route Example (No Authentication) 
+app.get('/api/dashboard', async (req, res) => {
+  try {
+    // This route is NOT protected; anyone can access it
+    res.status(200).json({ message: 'Welcome to the dashboard!' }); 
+  } catch (error) {
+    console.error('Error fetching dashboard data:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard data' });
+  }
+});
+
+
+// Start the Server
+app.listen(process.env.PORT, () => {
+  console.log('Server listening on port',process.env.PORT);
 });

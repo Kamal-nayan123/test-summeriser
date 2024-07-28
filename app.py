@@ -7,43 +7,47 @@ import os
 import fitz  # PyMuPDF
 from pymongo import MongoClient
 import google.generativeai as genai
+import logging
 
 # Set your Google Cloud API key
-genai.configure(api_key="AIzaSyCtBSlxpSniKO7h4xDsSblEXk9-gWL549M")
+genai.configure(api_key="AIzaSyCtBSlxpSniKO7h4xDsSblEXk9-gWL549M")  
 
 # MongoDB connection settings
-MONGO_URI = "mongodb+srv://kamalnayanchivukula:Premakanth%40123@database.ca2mjix.mongodb.net/" # Replace with your MongoDB connection URI
-DATABASE_NAME = "Text_SSummeriser"   # Replace with your database name
+MONGO_URI = "mongodb://localhost:27017/"  # Replace with your MongoDB connection URI
+DATABASE_NAME = "sample_rag"  # Replace with your database name
 COLLECTION_NAME = "rag"  # Replace with your collection name
 
 app = Flask(__name__)
-CORS(app) # Enable CORS for cross-origin requests
+CORS(app)  # Enable CORS for cross-origin requests
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)  # Log everything to console
 
 # Create the model
 # See https://ai.google.dev/api/python/google/generativeai/GenerativeModel
 generation_config = {
-  "temperature": 1,
-  "top_p": 0.95,
-  "top_k": 64,
-  "max_output_tokens": 8192,
-  "response_mime_type": "text/plain",
+    "temperature": 1,
+    "top_p": 0.95,
+    "top_k": 64,
+    "max_output_tokens": 111111,
+    "response_mime_type": "text/plain",
 }
 
 # Create a separate instance of the SentenceTransformer model for encoding text
 embedding_model = SentenceTransformer('all-mpnet-base-v2') 
 
 gemini_model = genai.GenerativeModel(
-  model_name="gemini-1.5-flash",
-  generation_config=generation_config,
-  # safety_settings = Adjust safety settings
-  # See https://ai.google.dev/gemini-api/docs/safety-settings
+    model_name="gemini-1.5-flash",
+    generation_config=generation_config,
+    # safety_settings = Adjust safety settings
+    # See https://ai.google.dev/gemini-api/docs/safety-settings
 )
 
 # Initialize the chat session
-chat_session = gemini_model.start_chat(
-  history=[
-  ]
-)
+# chat_session = gemini_model.start_chat(
+#     history=[
+#     ]
+# )
 
 def extract_text_from_pdf(pdf_path, chunk_size=512):
     doc = fitz.open(pdf_path)
@@ -125,7 +129,7 @@ def query_and_search(query):
     similar_chunks = search_similar_chunks(query, faiss_index, embedding_model, all_chunks)
     context = "\n\n".join(similar_chunks)
     prompt = f"Based on the following context, answer the query:\n\nContext:\n{context}\n\nQuery:\n{query}"
-    answer = generate_answer(prompt, chat_session)
+    answer = generate_answer(prompt, gemini_model.start_chat())
     return answer
 
 @app.route('/process_pdf', methods=['POST'])
@@ -136,15 +140,19 @@ def process_pdf():
         store_embeddings_in_mongodb(all_embeddings, all_chunks)
         return jsonify({'message': 'PDFs processed and embeddings stored'}), 200
     except Exception as e:
+        logging.error(f"Error in process_pdf endpoint: {e}")
         return jsonify({'error': str(e)}), 500
 
 @app.route('/search', methods=['POST'])
 def search():
     try:
         query = request.json['query']
+        logging.debug(f"Query received: {query}")
         answer = query_and_search(query)
+        logging.debug(f"Answer generated: {answer}")
         return jsonify({'answer': answer}), 200
     except Exception as e:
+        logging.error(f"Error in search endpoint: {e}")
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':

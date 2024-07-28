@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import { useNavigate } from 'react-router-dom';
 import './loginpage.css';
 
 const RegisterPage = () => {
@@ -7,13 +7,13 @@ const RegisterPage = () => {
   const [password, setPassword] = useState('');
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const navigate = useNavigate(); // Get the navigation function
+  const navigate = useNavigate(); 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setErrorMessage(null);
 
-    // 1. Basic Validation 
+    // 1. Basic Validation
     if (!email || !password) {
       setErrorMessage('Please enter both email and password.');
       return;
@@ -36,7 +36,7 @@ const RegisterPage = () => {
       if (response.ok) {
         // Successful registration - redirect to login
         navigate('/'); // Redirect to the login page
-        console.log('Registration successful! Please login.'); 
+        console.log('Registration successful! Please login.');
       } else {
         const data = await response.json();
         setErrorMessage(data.error || 'An error occurred during registration.');
